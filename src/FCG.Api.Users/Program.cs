@@ -1,41 +1,91 @@
+using FCG.Api.Users;
+using FCG.Api.Users.Infrastructure.Data.Context;
+using FCG.Api.Users.Infrastructure.Data;
+using FCG.Api.Users.Infrastructure.AWS;
+using FCG.Api.Users.Application;
+using FCG.Api.Users.Infrastructure.Data.Seed;
+using FCG.Api.Users.Infrastructure.AWS.Seed;
+using FCG.Api.Users.Domain.Entities;
+using FCG.Lib.Shared.Infrastructure.Middlewares;
+using FluentValidation.AspNetCore;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// API Layer - Controllers + Auth + Swagger + CORS
+builder.Services.AddApiServices(builder.Configuration);
+
+// FluentValidation Auto Validation
+builder.Services.AddFluentValidationAutoValidation();
+
+// Application Layer - CQRS + Validation
+builder.Services.AddApplicationServices();
+
+// Infrastructure - Database and Repositories
+builder.Services.AddDatabaseInfrastructure(builder.Configuration);
+
+// Infrastructure - AWS
+builder.Services.AddAwsInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Database Migration and Seed
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    
+    if (app.Environment.IsDevelopment())
+    {
+        await context.Database.MigrateAsync();
+    }
+    
+    // Seed admin user from environment variables
+    var adminEmail = builder.Configuration["Admin:Email"];
+    var adminPassword = builder.Configuration["Admin:Password"];
+    var adminName = "Administrator";
+
+    ArgumentException.ThrowIfNullOrEmpty(adminEmail, "Admin email is required for seeding");
+    ArgumentException.ThrowIfNullOrEmpty(adminPassword, "Admin password is required for seeding");
+
+    // Create admin user entity
+    var adminUser = User.CreateAdmin(adminName, adminEmail);
+    
+    // Seed Cognito (groups and admin user)
+    var cognitoSeeder = services.GetRequiredService<CognitoSeeder>();
+    var accountId = await cognitoSeeder.SeedAdminAsync(adminUser, adminPassword);
+
+    adminUser.SetAccountId(accountId);
+    
+    // Seed Database (admin user)
+    var databaseSeeder = services.GetRequiredService<DatabaseSeeder>();
+    await databaseSeeder.SeedAdminAsync(adminUser);
+}
+
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "FCG Users API v1");
+        c.RoutePrefix = "swagger";
+    });
 }
 
-app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
 
-var summaries = new[]
+if (!app.Environment.IsDevelopment())
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    app.UseHttpsRedirection();
+}
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.UseCors("AllowAll");
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
