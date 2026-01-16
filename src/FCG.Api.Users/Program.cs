@@ -7,6 +7,7 @@ using FCG.Api.Users.Infrastructure.Data.Seed;
 using FCG.Api.Users.Infrastructure.AWS.Seed;
 using FCG.Api.Users.Domain.Entities;
 using FCG.Lib.Shared.Infrastructure.Middlewares;
+using FCG.Lib.Shared.Messaging.Configuration;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +28,9 @@ builder.Services.AddDatabaseInfrastructure(builder.Configuration);
 // Infrastructure - AWS
 builder.Services.AddAwsInfrastructure(builder.Configuration);
 
+// Messaging - Publisher only
+builder.Services.AddMessagingPublisher(builder.Configuration);
+
 var app = builder.Build();
 
 // Database Migration and Seed
@@ -36,11 +40,8 @@ using (var scope = app.Services.CreateScope())
 
     var context = services.GetRequiredService<ApplicationDbContext>();
     
-    if (app.Environment.IsDevelopment())
-    {
-        await context.Database.MigrateAsync();
-    }
-    
+    await context.Database.MigrateAsync();
+
     // Seed admin user from environment variables
     var adminEmail = builder.Configuration["Admin:Email"];
     var adminPassword = builder.Configuration["Admin:Password"];
@@ -63,16 +64,12 @@ using (var scope = app.Services.CreateScope())
     await databaseSeeder.SeedAdminAsync(adminUser);
 }
 
-// Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "FCG Users API v1");
-        c.RoutePrefix = "swagger";
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "FCG Users API v1");
+    c.RoutePrefix = "swagger";
+});
 
 app.UseMiddleware<ExceptionMiddleware>();
 
