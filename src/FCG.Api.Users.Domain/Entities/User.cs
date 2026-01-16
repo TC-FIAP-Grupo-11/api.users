@@ -1,6 +1,5 @@
 using FCG.Lib.Shared.Domain.Entities;
-
-using FCG.Api.Users.Domain.Enumerations;
+using FCG.Lib.Shared.Domain.Enumerations;
 
 namespace FCG.Api.Users.Domain.Entities;
 

@@ -1,4 +1,4 @@
-using FCG.Api.Users.Domain.Enumerations;
+using FCG.Lib.Shared.Domain.Enumerations;
 using FluentAssertions;
 
 namespace FCG.Api.Users.Domain.Tests.Enumerations;

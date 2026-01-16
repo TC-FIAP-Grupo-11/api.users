@@ -1,7 +1,8 @@
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using FCG.Api.Users.Domain.Entities;
-using FCG.Api.Users.Domain.Enumerations;
+using FCG.Lib.Shared.Domain.Enumerations;
+using FCG.Api.Users.Infrastructure.AWS.Cognito.Services;
 using FCG.Api.Users.Infrastructure.AWS.Cognito.Configurations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using FCG.Api.Users.Domain.Entities;
-using FCG.Api.Users.Domain.Enumerations;
+using FCG.Lib.Shared.Domain.Enumerations;
 
 namespace FCG.Api.Users.Infrastructure.Data.Configurations;
 

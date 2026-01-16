@@ -11,6 +11,7 @@ using FCG.Api.Users.Application.Commands.Auth.ChangePassword;
 using FCG.Api.Users.Application.Commands.Auth.EnableUser;
 using FCG.Api.Users.Application.Commands.Auth.DisableUser;
 using FCG.Lib.Shared.Application.Extensions;
+using FCG.Lib.Shared.Application.Common.Models;
 using FCG.Api.Users.Contracts.Responses;
 using FCG.Api.Users.Application.Queries.Users.GetUserByEmail;
 
