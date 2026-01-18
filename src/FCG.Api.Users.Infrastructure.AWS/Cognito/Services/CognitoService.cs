@@ -234,14 +234,14 @@ public class CognitoService(
         }
     }
 
-    public async Task ChangePasswordAsync(string accessToken, string oldPassword, string newPassword, CancellationToken cancellationToken = default)
+    public async Task ChangePasswordAsync(string accessToken, string currentPassword, string newPassword, CancellationToken cancellationToken = default)
     {
         try
         {
             var request = new ChangePasswordRequest
             {
                 AccessToken = accessToken,
-                PreviousPassword = oldPassword,
+                PreviousPassword = currentPassword,
                 ProposedPassword = newPassword
             };
 

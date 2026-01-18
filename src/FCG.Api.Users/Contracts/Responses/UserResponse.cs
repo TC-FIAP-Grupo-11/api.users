@@ -4,8 +4,13 @@ public record UserResponse(
     Guid Id,
     string Name,
     string Email,
-    string Role,
+    RoleDto Role,
     string? AccountId,
     DateTime CreatedAt,
     DateTime UpdatedAt
+);
+
+public record RoleDto(
+    int Id,
+    string Name
 );

@@ -5,26 +5,16 @@ using FCG.Api.Users.Domain.Entities;
 using FCG.Api.Users.Application.Contracts.Repositories;
 using FCG.Lib.Shared.Application.Common.Models;
 using FCG.Lib.Shared.Application.Common.Errors;
-using FCG.Lib.Shared.Messaging.Contracts;
-using MassTransit;
 
 namespace FCG.Api.Users.Application.Commands.Auth.SignUp;
 
-public class SignUpCommandHandler : IRequestHandler<SignUpCommand, Result<Guid>>
+public class SignUpCommandHandler(
+    IUserRepository userRepository,
+    IAuthenticationService authenticationService
+    ) : IRequestHandler<SignUpCommand, Result<Guid>>
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IAuthenticationService _authenticationService;
-    private readonly IPublishEndpoint _publishEndpoint;
-
-    public SignUpCommandHandler(
-        IUserRepository userRepository,
-        IAuthenticationService authenticationService,
-        IPublishEndpoint publishEndpoint)
-    {
-        _userRepository = userRepository;
-        _authenticationService = authenticationService;
-        _publishEndpoint = publishEndpoint;
-    }
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly IAuthenticationService _authenticationService = authenticationService;
 
     public async Task<Result<Guid>> Handle(SignUpCommand request, CancellationToken cancellationToken)
     {
@@ -47,15 +37,6 @@ public class SignUpCommandHandler : IRequestHandler<SignUpCommand, Result<Guid>>
             user.SetAccountId(cognitoUserId);
 
             await _userRepository.AddAsync(user);
-
-            // Publicar evento de usuário criado
-            await _publishEndpoint.Publish(new UserCreatedEvent
-            {
-                UserId = user.Id,
-                Email = user.Email,
-                Name = user.Name,
-                CreatedAt = user.CreatedAt
-            }, cancellationToken);
 
             return Result.Success(user.Id);
         }

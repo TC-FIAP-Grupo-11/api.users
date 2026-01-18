@@ -4,7 +4,7 @@ using FCG.Lib.Shared.Application.Common.Models;
 
 namespace FCG.Api.Users.Application.Commands.Auth.ChangePassword;
 
-public record ChangePasswordCommand(string AccessToken, string OldPassword, string NewPassword) : IRequest<Result>;
+public record ChangePasswordCommand(string AccessToken, string CurrentPassword, string NewPassword) : IRequest<Result>;
 
 public class ChangePasswordCommandValidator : AbstractValidator<ChangePasswordCommand>
 {
@@ -13,7 +13,7 @@ public class ChangePasswordCommandValidator : AbstractValidator<ChangePasswordCo
         RuleFor(x => x.AccessToken)
             .NotEmpty().WithMessage("Access token is required");
 
-        RuleFor(x => x.OldPassword)
+        RuleFor(x => x.CurrentPassword)
             .NotEmpty().WithMessage("Old password is required");
 
         RuleFor(x => x.NewPassword)
@@ -24,6 +24,6 @@ public class ChangePasswordCommandValidator : AbstractValidator<ChangePasswordCo
             .Matches("[a-z]").WithMessage("Password must contain at least one lowercase letter")
             .Matches("[0-9]").WithMessage("Password must contain at least one digit")
             .Matches("[^a-zA-Z0-9]").WithMessage("Password must contain at least one special character")
-            .NotEqual(x => x.OldPassword).WithMessage("New password must be different from old password");
+            .NotEqual(x => x.CurrentPassword).WithMessage("New password must be different from old password");
     }
 }

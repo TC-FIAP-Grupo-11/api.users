@@ -11,7 +11,7 @@ public interface IAuthenticationService
     Task<Token> SignInAsync(string email, string password, CancellationToken cancellationToken = default);
     Task ForgotPasswordAsync(string email, CancellationToken cancellationToken = default);
     Task ResetPasswordAsync(string email, string resetCode, string newPassword, CancellationToken cancellationToken = default);
-    Task ChangePasswordAsync(string accessToken, string oldPassword, string newPassword, CancellationToken cancellationToken = default);
+    Task ChangePasswordAsync(string accessToken, string currentPassword, string newPassword, CancellationToken cancellationToken = default);
     Task EnableUserAsync(string email, CancellationToken cancellationToken = default);
     Task DisableUserAsync(string email, CancellationToken cancellationToken = default);
 }

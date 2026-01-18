@@ -16,7 +16,7 @@ public class ChangePasswordCommandHandler(IAuthenticationService authenticationS
         {
             await _authenticationService.ChangePasswordAsync(
                 request.AccessToken,
-                request.OldPassword,
+                request.CurrentPassword,
                 request.NewPassword,
                 cancellationToken
             );

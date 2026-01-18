@@ -14,6 +14,7 @@ using FCG.Lib.Shared.Application.Extensions;
 using FCG.Lib.Shared.Application.Common.Models;
 using FCG.Api.Users.Contracts.Responses;
 using FCG.Api.Users.Application.Queries.Users.GetUserByEmail;
+using FCG.Api.Users.Contracts.Requests;
 
 namespace FCG.Api.Users.Controllers;
 
@@ -24,7 +25,7 @@ public class AccountsController(IMediator mediator) : ControllerBase
     private readonly IMediator _mediator = mediator;
 
     [HttpGet("{email}")]
-    [Authorize(Policy = "UserOrAdmin")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
@@ -128,8 +129,11 @@ public class AccountsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
+        var accessToken = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+
+        var command = new ChangePasswordCommand(accessToken, request.CurrentPassword, request.NewPassword);
         var result = await _mediator.Send(command);
 
         if (result.IsFailure)
