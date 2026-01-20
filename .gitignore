@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# Kubernetes secrets
+k8s/secret.yaml
+
 # User-specific files
 *.rsuser
 *.suo
