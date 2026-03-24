@@ -1,11 +1,14 @@
 using Amazon;
 using Amazon.CognitoIdentityProvider;
+using Amazon.Lambda;
 using Amazon.Runtime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using FCG.Api.Users.Application.Contracts.Auth;
+using FCG.Api.Users.Application.Contracts.Notifications;
 using FCG.Api.Users.Infrastructure.AWS.Cognito.Configurations;
 using FCG.Api.Users.Infrastructure.AWS.Cognito.Services;
+using FCG.Api.Users.Infrastructure.AWS.Lambda;
 using FCG.Api.Users.Infrastructure.AWS.Seed;
 
 namespace FCG.Api.Users.Infrastructure.AWS;
@@ -55,9 +58,25 @@ public static class DependencyInjection
                 RegionEndpoint.GetBySystemName(awsSettings.Region));
         });
 
+        // AWS Lambda Client
+        services.AddSingleton<IAmazonLambda>(sp =>
+        {
+            AWSCredentials credentials;
+
+            if (!string.IsNullOrEmpty(awsSettings.SessionToken))
+                credentials = new SessionAWSCredentials(awsSettings.AccessKeyId, awsSettings.SecretAccessKey, awsSettings.SessionToken);
+            else if (!string.IsNullOrEmpty(awsSettings.AccessKeyId) && !string.IsNullOrEmpty(awsSettings.SecretAccessKey))
+                credentials = new BasicAWSCredentials(awsSettings.AccessKeyId, awsSettings.SecretAccessKey);
+            else
+                credentials = FallbackCredentialsFactory.GetCredentials();
+
+            return new AmazonLambdaClient(credentials, RegionEndpoint.GetBySystemName(awsSettings.Region));
+        });
+
         // Services
         services.AddScoped<IAuthenticationService, CognitoService>();
-        
+        services.AddScoped<ILambdaNotificationService, LambdaNotificationService>();
+
         // Seeder
         services.AddScoped<CognitoSeeder>();
 

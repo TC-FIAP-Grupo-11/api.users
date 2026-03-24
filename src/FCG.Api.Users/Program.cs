@@ -1,5 +1,6 @@
 using FCG.Api.Users;
 using FCG.Api.Users.Infrastructure.Data.Context;
+using Amazon.XRay.Recorder.Handlers.AspNetCore;
 using FCG.Api.Users.Infrastructure.Data;
 using FCG.Api.Users.Infrastructure.AWS;
 using FCG.Api.Users.Application;
@@ -71,6 +72,7 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
+app.UseXRay("fcg-users-api");
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (!app.Environment.IsDevelopment())

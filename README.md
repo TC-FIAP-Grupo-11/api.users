@@ -1,6 +1,6 @@
 # FCG.Api.Users
 
-**Tech Challenge - Fase 2**  
+**Tech Challenge - Fase 3**
 API de gerenciamento de usuários e autenticação.
 
 > **⚠️ Este microsserviço faz parte de um sistema maior.**  
@@ -88,3 +88,31 @@ dotnet test
 ```
 
 Testes unitários implementados em `FCG.Api.Users.Domain.Tests`.
+
+---
+
+## Fase 3 — Novidades
+
+### Lambda de Notificação
+Após confirmação de e-mail, o handler `ConfirmSignUpCommandHandler` invoca diretamente a função `FCG.Lambda.Notification` via AWS SDK (fire-and-forget) com o evento `UserCreated`.
+
+### Temporal Tables
+A entidade `Users` usa `IsTemporal()` via EF Core — o SQL Server mantém automaticamente o histórico de alterações na tabela `UsersHistory`.
+
+### Observabilidade
+- **AWS X-Ray**: middleware `app.UseXRay("fcg-users-api")` habilitado — rastreamento distribuído via CloudWatch
+
+### CI/CD (GitHub Actions)
+- **CI** (`.github/workflows/ci.yml`): build + testes em push/PR na `main`
+- **CD** (`.github/workflows/cd.yml`): build Docker → push ECR → `kubectl set image` no EKS
+
+**Secrets obrigatórios no repositório GitHub:**
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+
+### Kubernetes
+Manifests em `k8s/`:
+- `deployment.yaml` — Deployment com 2 réplicas
+- `service.yaml` — Service NLB interno (integrado ao AWS API Gateway via VPC Link)
+- `configmap.yaml` — Variáveis não sensíveis
+- `secret.yaml` — Connection string, credenciais AWS, Cognito
