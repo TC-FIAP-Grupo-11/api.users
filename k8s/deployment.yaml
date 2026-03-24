@@ -93,6 +93,16 @@ spec:
             configMapKeyRef:
               name: users-api-config
               key: SWAGGER_BASE_PATH
+        - name: NEW_RELIC_LICENSE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: newrelic-secret
+              key: NEW_RELIC_LICENSE_KEY
+        - name: NEW_RELIC_APP_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: users-api-config
+              key: NEW_RELIC_APP_NAME
         resources:
           requests:
             memory: "256Mi"
