@@ -48,21 +48,6 @@ spec:
             configMapKeyRef:
               name: users-api-config
               key: AWS_REGION
-        - name: AWS__AccessKeyId
-          valueFrom:
-            secretKeyRef:
-              name: users-api-secret
-              key: AWS_ACCESS_KEY_ID
-        - name: AWS__SecretAccessKey
-          valueFrom:
-            secretKeyRef:
-              name: users-api-secret
-              key: AWS_SECRET_ACCESS_KEY
-        - name: AWS__SessionToken
-          valueFrom:
-            secretKeyRef:
-              name: users-api-secret
-              key: AWS_SESSION_TOKEN
         - name: AWS__Cognito__UserPoolId
           valueFrom:
             secretKeyRef:
@@ -110,15 +95,19 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 80
+          failureThreshold: 30
+          periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /health
             port: 80
-          initialDelaySeconds: 30
           periodSeconds: 30
         readinessProbe:
           httpGet:
             path: /health
             port: 80
-          initialDelaySeconds: 15
           periodSeconds: 15
