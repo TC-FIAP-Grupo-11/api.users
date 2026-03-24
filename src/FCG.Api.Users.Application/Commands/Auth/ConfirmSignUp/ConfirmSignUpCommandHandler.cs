@@ -4,18 +4,18 @@ using FCG.Api.Users.Application.Contracts.Auth;
 using FCG.Lib.Shared.Application.Common.Models;
 using FCG.Lib.Shared.Application.Common.Errors;
 using FCG.Lib.Shared.Messaging.Contracts;
-using FCG.Api.Users.Application.Contracts.Notifications;
+using MassTransit;
 using FCG.Api.Users.Application.Contracts.Repositories;
 
 namespace FCG.Api.Users.Application.Commands.Auth.ConfirmSignUp;
 
 public class ConfirmSignUpCommandHandler(
     IAuthenticationService authenticationService,
-    ILambdaNotificationService lambdaNotificationService,
+    IPublishEndpoint publishEndpoint,
     IUserRepository userRepository) : IRequestHandler<ConfirmSignUpCommand, Result>
 {
     private readonly IAuthenticationService _authenticationService = authenticationService;
-    private readonly ILambdaNotificationService _lambdaNotificationService = lambdaNotificationService;
+    private readonly IPublishEndpoint _publishEndpoint = publishEndpoint;
     private readonly IUserRepository _userRepository = userRepository;
 
     public async Task<Result> Handle(ConfirmSignUpCommand request, CancellationToken cancellationToken)
@@ -35,8 +35,7 @@ public class ConfirmSignUpCommandHandler(
                 cancellationToken
             );
 
-            // Invocar Lambda de notificação (fire and forget)
-            await _lambdaNotificationService.InvokeAsync("UserCreated", new UserCreatedEvent
+            await _publishEndpoint.Publish(new UserCreatedEvent
             {
                 UserId = user.Id,
                 Email = user.Email,
