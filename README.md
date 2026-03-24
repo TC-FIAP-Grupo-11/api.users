@@ -5,7 +5,7 @@ API de gerenciamento de usuários e autenticação.
 
 > **⚠️ Este microsserviço faz parte de um sistema maior.**  
 > Para executar toda a plataforma (Docker Compose ou Kubernetes), veja: [FCG.Infra.Orchestration](../FCG.Infra.Orchestration/README.md)
-
+ 
 ## Sobre o Projeto
 
 A FCG API Users é responsável por gerenciar usuários, autenticação e autorização da plataforma FCG. Utiliza **AWS Cognito** para autenticação segura e publica eventos para notificar outros microsserviços sobre ações de usuários.
