@@ -32,14 +32,16 @@ jobs:
 
       - name: Build & Push
         env:
-          IMAGE: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }}
+          IMAGE_SHA:    ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }}
+          IMAGE_LATEST: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
         run: |
-          docker build -t $IMAGE .
-          docker push $IMAGE
+          docker build -t $IMAGE_SHA -t $IMAGE_LATEST .
+          docker push $IMAGE_SHA
+          docker push $IMAGE_LATEST
 
       - name: Deploy to EKS
         env:
-          IMAGE: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }}
+          IMAGE: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
         run: |
           aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
           kubectl set image deployment/${{ env.DEPLOYMENT }} ${{ env.CONTAINER }}=$IMAGE
