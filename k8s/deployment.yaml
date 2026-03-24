@@ -88,6 +88,11 @@ spec:
             configMapKeyRef:
               name: users-api-config
               key: RABBITMQ_PASSWORD
+        - name: SWAGGER_BASE_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: users-api-config
+              key: SWAGGER_BASE_PATH
         resources:
           requests:
             memory: "256Mi"

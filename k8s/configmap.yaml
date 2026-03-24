@@ -10,3 +10,4 @@ data:
   RABBITMQ_HOST: "rabbitmq-service"
   RABBITMQ_USERNAME: "guest"
   RABBITMQ_PASSWORD: "guest"
+  SWAGGER_BASE_PATH: "/users"
